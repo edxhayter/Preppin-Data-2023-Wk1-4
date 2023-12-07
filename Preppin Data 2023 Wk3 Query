@@ -1,0 +1,18 @@
+-- Preppin Data 2023_Wk03
+WITH stage1 as (SELECT 
+       Case WHEN tran.ONLINE_OR_IN_PERSON = 2 THEN 'Online'
+            ELSE 'In-Person' END AS mode,
+        TRIM(quarter(TO_TIMESTAMP_NTZ(transaction_date, 'DD/MM/YYYY hh24:mi:ss')), 'Q')::integer as Q,
+        SUM(value) as Value,
+        Target
+FROM pd2023_wk01 as tran
+    INNER JOIN (
+        SELECT *
+FROM pd2023_wk03_targets
+    UNPIVOT(Target FOR Quarter IN (Q1, Q2, Q3, Q4))
+    ) AS targ ON Q = Trim(targ.Quarter, 'Q')::integer AND mode = targ.ONLINE_OR_IN_PERSON
+WHERE contains(TRANSACTION_CODE, 'DSB')
+GROUP BY Q, mode, Target
+)
+SELECT mode, q, Value, Target, Value-Target as Delta
+FROM stage1;

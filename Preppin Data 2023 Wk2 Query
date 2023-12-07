@@ -1,0 +1,5 @@
+-- Preppin Data 2023_Wk02
+SELECT 
+    tran.transaction_id, 'GB'||swift.swift_code || replace(tran.sort_code, '-', '')::string || tran.account_number AS IBAN
+FROM PD2023_WK02_TRANSACTIONS AS tran
+    INNER JOIN PD2023_WK02_SWIFT_CODES AS swift ON tran.bank = swift.bank;
